@@ -2,10 +2,12 @@ name: Daily Commit
 
 on:
   schedule:
-    # Runs every day at 02:30 UTC
-    - cron: '30 2 * * *'
+    - cron: '30 2 * * *'  # Runs daily at 02:30 UTC
 
   workflow_dispatch:  # Allows manual triggering
+
+permissions:
+  contents: write  # ✅ This allows the workflow to push changes
 
 jobs:
   commit-job:
@@ -15,7 +17,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false  # ✅ Prevents conflicts with default token
 
       - name: Update File - 23f1001611@ds.study.iitm.ac.in
         run: |
@@ -30,6 +32,7 @@ jobs:
         run: |
           git add last_run.txt
           git commit -m "Automated daily commit - $(date)" || echo "No changes to commit"
-          git push origin main
+          git branch -M main
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
